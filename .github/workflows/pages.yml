@@ -3,8 +3,6 @@ name: Build and Deploy Jekyll Site
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -15,8 +13,16 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1'
-          bundler-cache: true
+          ruby-version: '3.2'  # 从 3.1 改成 3.2
+          bundler-cache: false
+          
+      - name: Install bundler
+        run: gem install bundler -v 4.0.6  # 安装你本地使用的版本
+          
+      - name: Install dependencies
+        run: |
+          bundle lock --add-platform x86_64-linux || true
+          bundle install
           
       - name: Build site
         run: bundle exec jekyll build
@@ -24,7 +30,6 @@ jobs:
           JEKYLL_ENV: production
      
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
